@@ -36,6 +36,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VpnChecker.cs" />
+    <Compile Include="WebHook.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">

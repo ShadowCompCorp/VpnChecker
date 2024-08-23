@@ -34,6 +34,24 @@ namespace VpnChecker
                 Log.Error("Failed to get VPN ip ranges!");
             }
         }
+        private static string BinaryToIp(int binary)
+        {
+            return string.Join(".",
+                new[]
+                {
+            (binary >> 24) & 0xFF,
+            (binary >> 16) & 0xFF,
+            (binary >> 8) & 0xFF,
+            binary & 0xFF
+                }.Select(octet => octet.ToString()));
+        }
+
+        public static (string StartIp, string EndIp) RangeToIp(Range range)
+        {
+            string startIp = BinaryToIp(range.Start);
+            string endIp = BinaryToIp(range.End);
+            return (startIp, endIp);
+        }
 
 
         private static int IpToBinary(string ip)
@@ -53,11 +71,21 @@ namespace VpnChecker
 
             return new Range(rangeStart, rangeEnd);
         }
-
+        
         public static bool IsVpn(string ip)
         {
             var ipBinary = IpToBinary(ip);
             return itree.Query(ipBinary);
+        }
+        public static (string StartIp, string EndIp) GetSubnetRange(string ip)
+        {
+            int ipBinary = IpToBinary(ip);
+            int startBinary = ipBinary & ~0xFF;
+            int endBinary = startBinary | 0xFF;
+            string startIp = BinaryToIp(startBinary);
+            string endIp = BinaryToIp(endBinary);
+
+            return (startIp, endIp);
         }
     }
 
@@ -74,6 +102,12 @@ namespace VpnChecker
         {
             return ranges.Any(range => range.Start <= value && range.End >= value);
         }
+        public (string StartIp, string EndIp) GetRange(int value)
+        {
+            Range range= ranges.Where(x => x.Start <= value && x.End >= value).First();
+            return VpnChecker.RangeToIp(range);
+        }
+
     }
 
     public struct Range
